@@ -87,26 +87,33 @@
         content: messageContent,
         timestamp: Date.now(),
         partition: partition,
-        status: 'in-topic',
+        status: 'producing', // Start with producing status for animation
         position: { ...producer.position }
       };
       
       // Activate producer animation
       producer.active = true;
-      setTimeout(() => {
-        systemStore.update(s => {
-          const p = s.producers.find(p => p.id === producer.id);
-          if (p) p.active = false;
-          return s;
-        });
-      }, 500);
       
       // Add to messages
       state.messages = [...state.messages, newMessage];
       
-      // Add to topic
-      const topic = state.topics[0];
-      topic.messages = [...topic.messages, messageId];
+      // Add to topic after animation delay
+      setTimeout(() => {
+        systemStore.update(s => {
+          const p = s.producers.find(p => p.id === producer.id);
+          if (p) p.active = false;
+          
+          const msg = s.messages.find(m => m.id === messageId);
+          if (msg) {
+            msg.status = 'in-topic';
+          }
+          
+          const topic = s.topics[0];
+          topic.messages = [...topic.messages, messageId];
+          
+          return s;
+        });
+      }, 800); // Slightly longer than the animation
       
       return state;
     });
@@ -272,7 +279,31 @@
         
         <!-- Draw messages -->
         {#each $systemStore.messages as message}
-          {#if message.status === 'in-topic'}
+          {#if message.status === 'producing'}
+            <!-- Message being produced - animate from producer to topic -->
+            {@const producer = $systemStore.producers.find(p => p.id === message.producer)}
+            {#if producer}
+              <circle 
+                r="6" 
+                fill="#2980b9"
+              >
+                <animateMotion
+                  dur="0.8s"
+                  repeatCount="1"
+                  calcMode="linear"
+                  keyPoints="0;1"
+                  keyTimes="0;1"
+                  path={`M${producer.position.x + 75},${producer.position.y + 25} L${$systemStore.topics[0].position.x},${$systemStore.topics[0].position.y + 25}`}
+                />
+                <animate 
+                  attributeName="r" 
+                  values="5;7;5" 
+                  dur="0.4s" 
+                  repeatCount="indefinite"
+                />
+              </circle>
+            {/if}
+          {:else if message.status === 'in-topic'}
             <!-- Message in the topic -->
             <circle 
               cx={$systemStore.topics[0].position.x + 75} 
