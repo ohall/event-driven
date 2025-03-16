@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { onMount, onDestroy } from 'svelte';
   import gsap from 'gsap';
   import type { EventData } from '../stores/eventStore';

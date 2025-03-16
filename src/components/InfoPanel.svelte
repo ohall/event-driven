@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { gameStore } from '../stores/gameStore';
   import { slide } from 'svelte/transition';
   import { quintOut } from 'svelte/easing';

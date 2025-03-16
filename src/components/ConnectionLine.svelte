@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { eventStore } from '../stores/eventStore';
   
   // Props

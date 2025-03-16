@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { createEventDispatcher } from 'svelte';
   import { pannable } from '../lib/pannable';
   import { eventStore } from '../stores/eventStore';

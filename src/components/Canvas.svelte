@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { onMount } from 'svelte';
   import { eventStore } from '../stores/eventStore';
   import { pannable } from '../lib/pannable';
@@ -8,13 +8,13 @@
   import ConnectionLine from './ConnectionLine.svelte';
   import EventParticle from './EventParticle.svelte';
   
-  let canvas: HTMLDivElement;
+  let canvas;
   let canvasWidth = 0;
   let canvasHeight = 0;
   let isDragging = false;
   let connectMode = false;
-  let connectFrom: string | null = null;
-  let connectType: string | null = null;
+  let connectFrom = null;
+  let connectType = null;
   let mouseX = 0;
   let mouseY = 0;
   
