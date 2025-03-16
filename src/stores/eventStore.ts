@@ -1,5 +1,4 @@
 import { writable, derived } from 'svelte/store';
-import type { Writable } from 'svelte/store';
 
 export interface EventData {
   id: string;
