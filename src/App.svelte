@@ -363,67 +363,32 @@
   
   h1 {
     text-align: center;
-    margin-bottom: 10px;
-  }
-  
-  .tabs {
-    display: flex;
-    gap: 5px;
     margin-bottom: 15px;
   }
   
-  .tabs button {
-    background-color: var(--background-light);
-    color: var(--text);
-    border: none;
-    padding: 8px 16px;
-    border-radius: 5px 5px 0 0;
-    cursor: pointer;
-  }
-  
-  .tabs button.active {
-    background-color: var(--primary);
-  }
-  
-  main {
+  .container {
+    display: flex;
     flex: 1;
+    gap: 20px;
+    height: 70vh;
+    min-height: 500px;
+  }
+  
+  /* Controls panel */
+  .control-panel {
+    width: 300px;
+    min-width: 280px;
     display: flex;
     flex-direction: column;
-    position: relative;
-    overflow: hidden;
+    gap: 15px;
+    overflow-y: auto;
     background-color: var(--background-light);
     border-radius: 5px;
+    padding: 15px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
   
-  .visualization {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .canvas {
-    width: 100%;
-    height: 100%;
-    min-height: 400px;
-  }
-  
-  rect.active {
-    filter: brightness(1.2);
-    stroke: white;
-    stroke-width: 2px;
-  }
-  
-  .controls-panel, .metrics-panel {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    overflow-y: auto;
-    height: 100%;
-  }
-  
-  .control-section, .metrics-section {
+  .control-section {
     background-color: var(--background);
     padding: 15px;
     border-radius: 5px;
@@ -459,11 +424,38 @@
     background-color: var(--primary-dark);
   }
   
+  /* Visualization */
+  .visualization {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--background-light);
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .canvas {
+    width: 100%;
+    height: 100%;
+  }
+  
+  rect.active {
+    filter: brightness(1.2);
+    stroke: white;
+    stroke-width: 2px;
+  }
+  
+  /* Info panel */
   .info-panel {
     margin-top: 20px;
     padding: 15px;
     background-color: var(--background-light);
     border-radius: 5px;
+  }
+  
+  /* Metrics */
+  .metrics-summary {
+    margin-top: 5px;
   }
   
   .metric-item {
@@ -478,19 +470,27 @@
     color: var(--accent);
   }
   
-  .group-metrics {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-  }
-  
   h2, h3, h4 {
     margin-top: 0;
     color: var(--accent);
-  }
-  
-  h4 {
     margin-bottom: 10px;
+  }
+
+  /* Responsive adjustment for smaller screens */
+  @media (max-width: 800px) {
+    .container {
+      flex-direction: column;
+      height: auto;
+    }
+    
+    .control-panel {
+      width: 100%;
+      order: 2;
+    }
+    
+    .visualization {
+      min-height: 400px;
+      order: 1;
+    }
   }
 </style>
