@@ -1,5 +1,7 @@
 # Event-Driven Architecture Visualizer
 
+![Cheerful Learning](docs/learner.jpg)
+
 A web application for exploring and learning about event-driven architecture through interactive visualization and simulation.
 
 🚀 **[Live Demo](https://ohall.github.io/event-driven/)**
