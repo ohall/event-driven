@@ -18,7 +18,7 @@
     isDragging = true;
   }
   
-  function handlePanMove(event: CustomEvent<{ dx: number; dy: number }>) {
+  function handlePanMove(event) {
     if (!isDragging) return;
     
     const { dx, dy } = event.detail;

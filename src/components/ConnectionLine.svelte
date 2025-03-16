@@ -13,7 +13,7 @@
   $: angle = Math.atan2(toNode.y - fromNode.y, toNode.x - fromNode.x);
   $: length = Math.hypot(toNode.x - fromNode.x, toNode.y - fromNode.y);
   
-  function getNodePosition(id: string) {
+  function getNodePosition(id) {
     // Find the node in one of our stores
     const emitter = $eventStore.emitters.find(e => e.id === id);
     if (emitter) {
