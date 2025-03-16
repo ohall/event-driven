@@ -55,10 +55,21 @@
     if (!consumerName.trim()) return;
     
     systemStore.update(state => {
-      // Reorganize all consumers by partition and group
-      // Get current number of consumers in this group
+      // Get current consumers in this group by partition
+      const partitionConsumers = {};
       const groupConsumers = state.consumers.filter(c => c.group === consumerGroup);
-      const partition = groupConsumers.length % 3;
+      
+      // Count how many consumers are in each partition for this group
+      groupConsumers.forEach(c => {
+        if (!partitionConsumers[c.partition]) {
+          partitionConsumers[c.partition] = [];
+        }
+        partitionConsumers[c.partition].push(c);
+      });
+      
+      // Assign to least populated partition
+      let partitionCounts = [0, 1, 2].map(p => (partitionConsumers[p] || []).length);
+      let partition = partitionCounts.indexOf(Math.min(...partitionCounts));
       
       // Create new consumer
       const newConsumer = {
@@ -72,47 +83,42 @@
         processed: 0
       };
       
-      // Position based on partition (horizontally) and group (vertically)
-      if (consumerGroup === 'group-1') {
-        // Group 1 - top row
-        newConsumer.position = { 
-          x: 550 + (partition * 40), 
-          y: 100 + (groupConsumers.length * 30) % 80 // Stack within partition but not too much
-        };
-      } else {
-        // Group 2 - bottom row
-        newConsumer.position = { 
-          x: 550 + (partition * 40), 
-          y: 250 + (groupConsumers.length * 30) % 80 
-        };
-      }
+      // Add to list of consumers
+      const newConsumers = [...state.consumers, newConsumer];
       
-      // Add the new consumer
-      state.consumers = [...state.consumers, newConsumer];
-      consumerName = '';
+      // Position ALL consumers to avoid overlap
+      const spacingX = 170; // Width of consumer + padding
+      const spacingY = 70;  // Height of consumer + padding
       
-      // Reorganize existing consumers to keep the display clean
-      state.consumers = state.consumers.map((consumer, index) => {
-        const groupConsumers = state.consumers.filter(c => c.group === consumer.group);
-        const groupCount = groupConsumers.length;
+      // Group and partition all consumers for positioning
+      const consumersByGroup = {
+        'group-1': [0, 1, 2].map(p => newConsumers.filter(c => c.group === 'group-1' && c.partition === p)),
+        'group-2': [0, 1, 2].map(p => newConsumers.filter(c => c.group === 'group-2' && c.partition === p))
+      };
+      
+      // Position each consumer
+      newConsumers.forEach(consumer => {
+        const groupIndex = consumer.group === 'group-1' ? 0 : 1;
+        const partitionConsumers = consumersByGroup[consumer.group][consumer.partition];
+        const consumerIndex = partitionConsumers.indexOf(consumer);
         
-        // Calculate position
-        if (consumer.group === 'group-1') {
-          consumer.position = { 
-            x: 550 + (consumer.partition * 40),
-            y: 100 + (groupConsumers.indexOf(consumer) * 30) % 80
-          };
-        } else {
-          consumer.position = { 
-            x: 550 + (consumer.partition * 40),
-            y: 250 + (groupConsumers.indexOf(consumer) * 30) % 80
-          };
-        }
+        // Base position for this partition
+        const baseX = 550 + (consumer.partition * spacingX);
+        const baseY = 100 + (groupIndex * 200); // Group 1 at y=100, Group 2 at y=300
         
-        return consumer;
+        // Position with offset based on index within partition
+        consumer.position = {
+          x: baseX,
+          y: baseY + (consumerIndex * spacingY)
+        };
       });
       
-      return state;
+      // Update state
+      consumerName = '';
+      return {
+        ...state,
+        consumers: newConsumers
+      };
     });
   }
   
