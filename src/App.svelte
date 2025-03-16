@@ -359,14 +359,15 @@
         {/each}
         
         {#each $systemStore.consumers as consumer}
-          <line 
-            x1={$systemStore.topics[0].position.x + 150} 
-            y1={$systemStore.topics[0].position.y + 25 + consumer.partition * 40} 
-            x2={consumer.position.x} 
-            y2={consumer.position.y + 25} 
-            stroke={consumer.group === 'group-1' ? 'rgba(231,76,60,0.3)' : 'rgba(155,89,182,0.3)'} 
-            stroke-width="3"
+          <path 
+            d={`M${$systemStore.topics[0].position.x + 150} ${$systemStore.topics[0].position.y + 25 + consumer.partition * 40} 
+                C${$systemStore.topics[0].position.x + 250} ${$systemStore.topics[0].position.y + 25 + consumer.partition * 40},
+                ${consumer.position.x - 100} ${consumer.position.y + 25},
+                ${consumer.position.x} ${consumer.position.y + 25}`}
+            stroke={consumer.group === 'group-1' ? 'rgba(231,76,60,0.4)' : 'rgba(155,89,182,0.4)'} 
+            stroke-width="2"
             stroke-dasharray="5,5"
+            fill="none"
           />
         {/each}
         
