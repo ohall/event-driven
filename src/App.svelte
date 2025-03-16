@@ -131,8 +131,13 @@
               // Consumer processes this message
               consumer.active = true;
               messages[messageIndex].status = 'processing';
+              messages[messageIndex].animationProgress = 0;
+              messages[messageIndex].consumerId = consumer.id;
               
-              // Complete processing after delay
+              // Animation progress
+              const animationDuration = 1500; // 1.5 seconds, matches the SVG animation duration
+              
+              // Keep consumer active during animation, then process
               setTimeout(() => {
                 systemStore.update(s => {
                   const c = s.consumers.find(c => c.id === consumer.id);
@@ -148,7 +153,7 @@
                   
                   return s;
                 });
-              }, 1000 + Math.random() * 2000);
+              }, animationDuration + 500); // Animation + a little extra time for processing
             }
           }
         });
@@ -276,15 +281,49 @@
               fill="#f1c40f"
             />
           {:else if message.status === 'processing'}
-            <!-- Message being processed - animate from topic to consumer -->
+            <!-- Message being processed - animate exactly along the path -->
             {@const consumer = $systemStore.consumers.find(c => c.partition === message.partition && c.active)}
             {#if consumer}
+              <!-- Animation with actual SVG animation element for smooth motion -->
               <circle 
-                cx={$systemStore.topics[0].position.x + 75 + ((consumer.position.x - $systemStore.topics[0].position.x - 75) * 0.7)} 
-                cy={$systemStore.topics[0].position.y + 25 + message.partition * 40 + ((consumer.position.y - $systemStore.topics[0].position.y - 25 - message.partition * 40) * 0.7)} 
                 r="6" 
                 fill={consumer.color}
-              />
+              >
+                <animateMotion
+                  dur="1.5s"
+                  repeatCount="1"
+                  calcMode="linear"
+                  keyPoints="0;1"
+                  keyTimes="0;1"
+                  path={`M${$systemStore.topics[0].position.x + 150},${$systemStore.topics[0].position.y + 25 + message.partition * 40} L${consumer.position.x},${consumer.position.y + 25}`}
+                />
+                <animate 
+                  attributeName="r" 
+                  values="5;7;5" 
+                  dur="0.6s" 
+                  repeatCount="indefinite"
+                />
+              </circle>
+              
+              <!-- Highlight the active consumer with glow -->
+              <rect 
+                x={consumer.position.x} 
+                y={consumer.position.y} 
+                width="150" 
+                height="50" 
+                rx="10" 
+                fill="none" 
+                stroke="white" 
+                stroke-width="3" 
+                opacity="0.7"
+              >
+                <animate 
+                  attributeName="opacity" 
+                  values="0.2;0.7;0.2" 
+                  dur="1s" 
+                  repeatCount="indefinite"
+                />
+              </rect>
             {/if}
           {/if}
         {/each}
