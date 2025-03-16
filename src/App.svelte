@@ -321,16 +321,6 @@
     
     return () => clearInterval(intervalId);
   }
-        
-        return {
-          ...state,
-          messages
-        };
-      });
-    }, 1000);
-    
-    return () => clearInterval(intervalId);
-  }
   
   onMount(() => {
     // Start message processing
@@ -467,7 +457,7 @@
             />
           {:else if message.status === 'processing'}
             <!-- Message being processed - calculate position along curved path -->
-            {@const consumer = $systemStore.consumers.find(c => c.partition === message.partition && c.active)}
+            {@const consumer = $systemStore.consumers.find(c => c.id === message.consumerId)}
             {#if consumer && message.animationProgress !== undefined}
               <!-- Calculate position along the curved Bezier path -->
               {@const startX = $systemStore.topics[0].position.x + 150}
