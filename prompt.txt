@@ -1,0 +1,15 @@
+Create a visually engaging, educational web game using Svelte.js that interactively teaches and demonstrates event-driven architecture concepts. The game's visual style should emulate the vibrant, minimalist aesthetic of Kurzgesagt animations, using flat design elements, bold color palettes, and smooth transitions.
+
+Key requirements include:
+
+Interactive visual representation of core event-driven concepts such as events, event emitters, event listeners, queues, and handlers.
+
+Allow users to create, trigger, and manage events through drag-and-drop or clickable components, clearly visualizing event propagation and handling.
+
+Include real-time animations that depict event flows and interactions, emphasizing asynchronous operations and event queues.
+
+Provide interactive scenarios or puzzles where users can experiment with managing complex event-driven systems, learning through exploration and immediate feedback.
+
+Include brief, clear explanations within the interface to educate users on each core concept as they interact with components.
+
+Ensure responsiveness, accessibility, and intuitive navigation to support seamless learning experiences for diverse user groups.
