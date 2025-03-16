@@ -203,55 +203,114 @@
         const topic = state.topics[0];
         const messages = [...state.messages];
         
-        // Group consumers by partition and group
-        const consumersByPartitionAndGroup = {};
-        
-        // Initialize structure
-        for (let partition = 0; partition < 3; partition++) {
-          consumersByPartitionAndGroup[partition] = {
-            'group-1': [],
-            'group-2': []
-          };
-        }
-        
-        // Organize consumers by partition and group
+        // For each consumer, find a message in their partition
         state.consumers.forEach(consumer => {
           if (!consumer.active) {
-            consumersByPartitionAndGroup[consumer.partition][consumer.group].push(consumer);
+            const messageIndex = messages.findIndex(m => 
+              m.status === 'in-topic' && 
+              m.partition === consumer.partition
+            );
+            
+            if (messageIndex !== -1) {
+              // Create a copy of the message for this consumer group
+              const message = messages[messageIndex];
+              
+              // Consumer processes this message
+              const messageId = message.id;
+              const consumerGroupInstanceId = `${messageId}-${consumer.group}`;
+              
+              // Mark consumer as active
+              consumer.active = true;
+              
+              // Create a processing/animation state for this consumer
+              const processingMessage = {
+                id: consumerGroupInstanceId,
+                originalId: messageId,
+                producer: message.producer,
+                content: message.content,
+                timestamp: message.timestamp,
+                partition: message.partition,
+                status: 'processing',
+                group: consumer.group,
+                consumerId: consumer.id,
+                animationProgress: 0,
+                pulse: 0
+              };
+              
+              // Add to messages list
+              messages.push(processingMessage);
+              
+              // Start animation
+              let progress = 0;
+              const animationDuration = 1500; // ms
+              const startTime = Date.now();
+              
+              const animationInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                progress = Math.min(elapsed / animationDuration, 1);
+                
+                systemStore.update(s => {
+                  const msg = s.messages.find(m => m.id === consumerGroupInstanceId);
+                  if (msg) {
+                    msg.animationProgress = progress;
+                    msg.pulse = Math.sin(elapsed / 100) * 1.5;
+                  }
+                  return s;
+                });
+                
+                // When animation completes
+                if (progress >= 1) {
+                  clearInterval(animationInterval);
+                  
+                  // After a short delay, complete the processing
+                  setTimeout(() => {
+                    systemStore.update(s => {
+                      // Find this consumer
+                      const c = s.consumers.find(c => c.id === consumer.id);
+                      if (c) {
+                        c.active = false;
+                        c.processed++;
+                      }
+                      
+                      // Find the processing message instance
+                      const processingMsg = s.messages.find(m => m.id === consumerGroupInstanceId);
+                      if (processingMsg) {
+                        processingMsg.status = 'consumed';
+                      }
+                      
+                      // Track which groups have processed this message
+                      const originalMessage = s.messages.find(m => m.id === messageId);
+                      if (originalMessage) {
+                        // Initialize processed groups if not yet set
+                        if (!originalMessage.processedGroups) {
+                          originalMessage.processedGroups = [];
+                        }
+                        
+                        // Add this group to processed groups if not already there
+                        if (!originalMessage.processedGroups.includes(consumer.group)) {
+                          originalMessage.processedGroups.push(consumer.group);
+                        }
+                        
+                        // Check if all consumer groups have processed this message
+                        const allGroups = [...new Set(s.consumers.map(c => c.group))];
+                        const allProcessed = allGroups.every(group => 
+                          originalMessage.processedGroups.includes(group)
+                        );
+                        
+                        // If all groups have processed, mark as fully consumed
+                        if (allProcessed) {
+                          originalMessage.status = 'consumed';
+                        }
+                      }
+                      
+                      return s;
+                    });
+                  }, 500); // Short processing time after animation
+                }
+              }, 16); // ~60fps update
+            }
           }
         });
-        
-        // For each partition, find eligible messages and assign to consumers in each group
-        for (let partition = 0; partition < 3; partition++) {
-          // Find messages in this partition that are in the topic
-          const eligibleMessages = messages.filter(m => 
-            m.status === 'in-topic' && 
-            m.partition === partition
-          );
-          
-          // For each message, try to assign to one consumer in each group
-          eligibleMessages.forEach(message => {
-            // Try to assign to a consumer in group 1
-            if (consumersByPartitionAndGroup[partition]['group-1'].length > 0) {
-              const consumer = consumersByPartitionAndGroup[partition]['group-1'][0];
-              if (!consumer.active) {
-                processMessageForConsumer(message, consumer, messages);
-                // Remove this consumer from available list
-                consumersByPartitionAndGroup[partition]['group-1'].shift();
-              }
-            }
-            
-            // Try to assign to a consumer in group 2 (same message, different consumer group)
-            if (consumersByPartitionAndGroup[partition]['group-2'].length > 0) {
-              const consumer = consumersByPartitionAndGroup[partition]['group-2'][0];
-              if (!consumer.active) {
-                processMessageForConsumer(message, consumer, messages);
-                // Remove this consumer from available list
-                consumersByPartitionAndGroup[partition]['group-2'].shift();
-              }
-            }
-          });
-        }
         
         return {
           ...state,
@@ -261,72 +320,6 @@
     }, 1000);
     
     return () => clearInterval(intervalId);
-  }
-  
-  // Helper function to process a message for a specific consumer
-  function processMessageForConsumer(message, consumer, messages) {
-    // Consumer processes this message
-    const messageId = message.id;
-    consumer.active = true;
-    message.status = 'processing';
-    message.animationProgress = 0;
-    message.consumerId = consumer.id;
-    message.pulse = 0;
-              
-    // Animate the message moving from topic to consumer
-    let progress = 0;
-    const animationDuration = 1500; // ms
-    const startTime = Date.now();
-    
-    const animationInterval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      progress = Math.min(elapsed / animationDuration, 1);
-      
-      systemStore.update(s => {
-        const msg = s.messages.find(m => m.id === messageId);
-        if (msg) {
-          msg.animationProgress = progress;
-          // Add a pulsing effect
-          msg.pulse = Math.sin(elapsed / 100) * 1.5;
-        }
-        return s;
-      });
-      
-      // When animation completes
-      if (progress >= 1) {
-        clearInterval(animationInterval);
-        
-        // After a short delay, complete the processing
-        setTimeout(() => {
-          systemStore.update(s => {
-            const c = s.consumers.find(c => c.id === consumer.id);
-            if (c) {
-              c.active = false;
-              c.processed++;
-            }
-            
-            const msg = s.messages.find(m => m.id === messageId);
-            if (msg) {
-              // Important: Only mark as consumed if BOTH consumer groups have processed it,
-              // otherwise keep it in-topic so other consumer group can also process it
-              const bothGroupsProcessed = s.consumers.some(otherConsumer => 
-                otherConsumer.group !== consumer.group && 
-                otherConsumer.processed > 0
-              );
-              
-              if (bothGroupsProcessed) {
-                msg.status = 'consumed';
-              } else {
-                // Reset message status so other consumer group can process it
-                msg.status = 'in-topic';
-              }
-            }
-            
-            return s;
-          });
-        }, 500); // Short processing time after animation
-      }
-    }, 16); // ~60fps update
   }
         
         return {
