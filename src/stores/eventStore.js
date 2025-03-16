@@ -199,7 +199,10 @@ export const eventStore = {
         // Send to first connected handler
         const handlerId = handlerConnections[0].to;
         if (state.events[eventId]) {
-          this.processEvent(eventId, handlerId);
+          // Call processEvent from eventStore, not using 'this'
+          setTimeout(() => {
+            eventStore.processEvent(eventId, handlerId);
+          }, 0);
         }
       }
       

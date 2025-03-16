@@ -1,5 +1,20 @@
 # Event-Driven Architecture Visualizer
 
+```
+    ,---.
+   /    |
+  /     |  ,---.
+ /      | /    |    🔬 Learn & Explore
+|       |/     |    Event-Driven Architecture!
+|       /      |
+|      /       |
+|     /        |
+|    /         |
+'---'          |
+     \        /
+      `-..-'´
+```
+
 A web application for exploring and learning about event-driven architecture through interactive visualization and simulation.
 
 🚀 **[Live Demo](https://ohall.github.io/event-driven/)**
