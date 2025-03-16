@@ -1,9 +1,10 @@
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import sveltePreprocess from 'svelte-preprocess';
 
 export default {
   // Consult https://svelte.dev/docs/integrations#preprocessors
   // for more information about preprocessors
-  preprocess: vitePreprocess({
-    typescript: true
-  }),
+  preprocess: sveltePreprocess({
+    typescript: true,
+    sourceMap: true
+  })
 };
