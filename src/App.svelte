@@ -88,7 +88,8 @@
         timestamp: Date.now(),
         partition: partition,
         status: 'producing', // Start with producing status for animation
-        position: { ...producer.position }
+        animationProgress: 0,
+        pulse: 0
       };
       
       // Activate producer animation
@@ -97,23 +98,46 @@
       // Add to messages
       state.messages = [...state.messages, newMessage];
       
-      // Add to topic after animation delay
-      setTimeout(() => {
+      // Animate the message moving from producer to topic
+      let progress = 0;
+      const animationDuration = 800; // ms
+      const startTime = Date.now();
+      
+      const animationInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        progress = Math.min(elapsed / animationDuration, 1);
+        
         systemStore.update(s => {
-          const p = s.producers.find(p => p.id === producer.id);
-          if (p) p.active = false;
-          
           const msg = s.messages.find(m => m.id === messageId);
           if (msg) {
-            msg.status = 'in-topic';
+            msg.animationProgress = progress;
+            // Add a pulsing effect
+            msg.pulse = Math.sin(elapsed / 100) * 1.5;
           }
-          
-          const topic = s.topics[0];
-          topic.messages = [...topic.messages, messageId];
-          
           return s;
         });
-      }, 800); // Slightly longer than the animation
+        
+        // When animation completes
+        if (progress >= 1) {
+          clearInterval(animationInterval);
+          
+          // Update the message to be in the topic
+          systemStore.update(s => {
+            const p = s.producers.find(p => p.id === producer.id);
+            if (p) p.active = false;
+            
+            const msg = s.messages.find(m => m.id === messageId);
+            if (msg) {
+              msg.status = 'in-topic';
+            }
+            
+            const topic = s.topics[0];
+            topic.messages = [...topic.messages, messageId];
+            
+            return s;
+          });
+        }
+      }, 16); // ~60fps update
       
       return state;
     });
@@ -136,31 +160,55 @@
             
             if (messageIndex !== -1) {
               // Consumer processes this message
+              const messageId = messages[messageIndex].id;
               consumer.active = true;
               messages[messageIndex].status = 'processing';
               messages[messageIndex].animationProgress = 0;
               messages[messageIndex].consumerId = consumer.id;
+              messages[messageIndex].pulse = 0;
               
-              // Animation progress
-              const animationDuration = 1500; // 1.5 seconds, matches the SVG animation duration
+              // Animate the message moving from topic to consumer
+              let progress = 0;
+              const animationDuration = 1500; // ms
+              const startTime = Date.now();
               
-              // Keep consumer active during animation, then process
-              setTimeout(() => {
+              const animationInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                progress = Math.min(elapsed / animationDuration, 1);
+                
                 systemStore.update(s => {
-                  const c = s.consumers.find(c => c.id === consumer.id);
-                  if (c) {
-                    c.active = false;
-                    c.processed++;
-                  }
-                  
-                  const msg = s.messages.find(m => m.id === messages[messageIndex].id);
+                  const msg = s.messages.find(m => m.id === messageId);
                   if (msg) {
-                    msg.status = 'consumed';
+                    msg.animationProgress = progress;
+                    // Add a pulsing effect
+                    msg.pulse = Math.sin(elapsed / 100) * 1.5;
                   }
-                  
                   return s;
                 });
-              }, animationDuration + 500); // Animation + a little extra time for processing
+                
+                // When animation completes
+                if (progress >= 1) {
+                  clearInterval(animationInterval);
+                  
+                  // After a short delay, complete the processing
+                  setTimeout(() => {
+                    systemStore.update(s => {
+                      const c = s.consumers.find(c => c.id === consumer.id);
+                      if (c) {
+                        c.active = false;
+                        c.processed++;
+                      }
+                      
+                      const msg = s.messages.find(m => m.id === messageId);
+                      if (msg) {
+                        msg.status = 'consumed';
+                      }
+                      
+                      return s;
+                    });
+                  }, 500); // Short processing time after animation
+                }
+              }, 16); // ~60fps update
             }
           }
         });
