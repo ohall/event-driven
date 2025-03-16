@@ -176,219 +176,165 @@
 <div class="app">
   <h1>Event-Driven Messaging System</h1>
   
-  <div class="tabs">
-    <button 
-      class:active={selectedTab === 'visualization'} 
-      on:click={() => selectedTab = 'visualization'}
-    >
-      Visualization
-    </button>
-    <button 
-      class:active={selectedTab === 'controls'} 
-      on:click={() => selectedTab = 'controls'}
-    >
-      Controls
-    </button>
-    <button 
-      class:active={selectedTab === 'metrics'} 
-      on:click={() => selectedTab = 'metrics'}
-    >
-      Metrics
-    </button>
-  </div>
-  
-  <main>
-    {#if selectedTab === 'visualization'}
-      <div class="visualization">
-        <svg class="canvas" width="100%" height="100%">
-          <!-- Draw connections -->
-          {#each $systemStore.producers as producer}
-            <line 
-              x1={producer.position.x + 75} 
-              y1={producer.position.y + 25} 
-              x2={$systemStore.topics[0].position.x} 
-              y2={$systemStore.topics[0].position.y + 25} 
-              stroke="rgba(255,255,255,0.3)" 
-              stroke-width="3"
-              stroke-dasharray="5,5"
-            />
-          {/each}
-          
-          {#each $systemStore.consumers as consumer}
-            <line 
-              x1={$systemStore.topics[0].position.x + 150} 
-              y1={$systemStore.topics[0].position.y + 25 + consumer.partition * 40} 
-              x2={consumer.position.x} 
-              y2={consumer.position.y + 25} 
-              stroke={consumer.group === 'group-1' ? 'rgba(231,76,60,0.3)' : 'rgba(155,89,182,0.3)'} 
-              stroke-width="3"
-              stroke-dasharray="5,5"
-            />
-          {/each}
-          
-          <!-- Draw messages -->
-          {#each $systemStore.messages as message}
-            {#if message.status === 'in-topic'}
-              <!-- Message in the topic -->
-              <circle 
-                cx={$systemStore.topics[0].position.x + 75} 
-                cy={$systemStore.topics[0].position.y + 25 + message.partition * 40} 
-                r="6" 
-                fill="#f1c40f"
-              />
-            {:else if message.status === 'processing'}
-              <!-- Message being processed - animate from topic to consumer -->
-              {@const consumer = $systemStore.consumers.find(c => c.partition === message.partition && c.active)}
-              {#if consumer}
-                <circle 
-                  cx={$systemStore.topics[0].position.x + 75 + ((consumer.position.x - $systemStore.topics[0].position.x - 75) * 0.7)} 
-                  cy={$systemStore.topics[0].position.y + 25 + message.partition * 40 + ((consumer.position.y - $systemStore.topics[0].position.y - 25 - message.partition * 40) * 0.7)} 
-                  r="6" 
-                  fill={consumer.color}
-                />
-              {/if}
-            {/if}
-          {/each}
-          
-          <!-- Draw producers -->
-          {#each $systemStore.producers as producer}
-            <g transform={`translate(${producer.position.x}, ${producer.position.y})`}>
-              <rect width="150" height="50" rx="10" fill={producer.color} class:active={producer.active} />
-              <text x="75" y="30" text-anchor="middle" fill="white" font-size="14px">{producer.name}</text>
-            </g>
-          {/each}
-          
-          <!-- Draw topic with partitions -->
-          <g transform={`translate(${$systemStore.topics[0].position.x}, ${$systemStore.topics[0].position.y})`}>
-            <rect width="150" height="150" rx="10" fill={$systemStore.topics[0].color} />
-            <text x="75" y="30" text-anchor="middle" fill="#333" font-size="16px" font-weight="bold">{$systemStore.topics[0].name}</text>
-            
-            <!-- Partitions -->
-            <rect x="10" y="45" width="130" height="30" rx="5" fill="rgba(0,0,0,0.1)" />
-            <text x="20" y="65" fill="#333" font-size="12px">Partition 0</text>
-            <text x="120" y="65" text-anchor="end" fill="#333" font-size="12px">
-              {$systemStore.messages.filter(m => m.status === 'in-topic' && m.partition === 0).length}
-            </text>
-            
-            <rect x="10" y="85" width="130" height="30" rx="5" fill="rgba(0,0,0,0.1)" />
-            <text x="20" y="105" fill="#333" font-size="12px">Partition 1</text>
-            <text x="120" y="105" text-anchor="end" fill="#333" font-size="12px">
-              {$systemStore.messages.filter(m => m.status === 'in-topic' && m.partition === 1).length}
-            </text>
-            
-            <rect x="10" y="125" width="130" height="30" rx="5" fill="rgba(0,0,0,0.1)" />
-            <text x="20" y="145" fill="#333" font-size="12px">Partition 2</text>
-            <text x="120" y="145" text-anchor="end" fill="#333" font-size="12px">
-              {$systemStore.messages.filter(m => m.status === 'in-topic' && m.partition === 2).length}
-            </text>
-          </g>
-          
-          <!-- Draw consumers -->
-          {#each $systemStore.consumers as consumer}
-            <g transform={`translate(${consumer.position.x}, ${consumer.position.y})`}>
-              <rect width="150" height="50" rx="10" fill={consumer.color} class:active={consumer.active} />
-              <text x="75" y="25" text-anchor="middle" fill="white" font-size="14px">{consumer.name}</text>
-              <text x="75" y="40" text-anchor="middle" fill="white" font-size="12px">
-                Group: {consumer.group}, Part: {consumer.partition}
-              </text>
-            </g>
-          {/each}
-        </svg>
-      </div>
-    {:else if selectedTab === 'controls'}
-      <div class="controls-panel">
-        <div class="control-section">
-          <h2>Add Producer</h2>
-          <div class="form-group">
-            <label for="producer-name">Producer Name:</label>
-            <input type="text" id="producer-name" bind:value={producerName} placeholder="Enter producer name">
-            <button on:click={addProducer}>Add Producer</button>
-          </div>
-        </div>
-        
-        <div class="control-section">
-          <h2>Add Consumer</h2>
-          <div class="form-group">
-            <label for="consumer-name">Consumer Name:</label>
-            <input type="text" id="consumer-name" bind:value={consumerName} placeholder="Enter consumer name">
-            
-            <label for="consumer-group">Consumer Group:</label>
-            <select id="consumer-group" bind:value={consumerGroup}>
-              <option value="group-1">Group 1 (Red)</option>
-              <option value="group-2">Group 2 (Purple)</option>
-            </select>
-            
-            <button on:click={addConsumer}>Add Consumer</button>
-          </div>
-        </div>
-        
-        <div class="control-section">
-          <h2>Produce Message</h2>
-          <div class="form-group">
-            <label for="producer-select">Select Producer:</label>
-            <select id="producer-select" bind:value={selectedProducerId}>
-              {#each $systemStore.producers as producer}
-                <option value={producer.id}>{producer.name}</option>
-              {/each}
-            </select>
-            
-            <label for="message-content">Message Content:</label>
-            <input type="text" id="message-content" bind:value={messageContent} placeholder="Enter message content">
-            
-            <button on:click={produceMessage}>Send Message</button>
-          </div>
+  <div class="container">
+    <!-- Left side: Controls -->
+    <div class="control-panel">
+      <div class="control-section">
+        <h2>Add Producer</h2>
+        <div class="form-group">
+          <label for="producer-name">Producer Name:</label>
+          <input type="text" id="producer-name" bind:value={producerName} placeholder="Enter producer name">
+          <button on:click={addProducer}>Add Producer</button>
         </div>
       </div>
-    {:else if selectedTab === 'metrics'}
-      <div class="metrics-panel">
-        <h2>System Metrics</h2>
-        
-        <div class="metrics-section">
-          <h3>Messages</h3>
-          <div class="metric-item">
-            <span>Total Messages:</span>
-            <span class="metric-value">{$systemStore.messages.length}</span>
-          </div>
+      
+      <div class="control-section">
+        <h2>Add Consumer</h2>
+        <div class="form-group">
+          <label for="consumer-name">Consumer Name:</label>
+          <input type="text" id="consumer-name" bind:value={consumerName} placeholder="Enter consumer name">
+          
+          <label for="consumer-group">Consumer Group:</label>
+          <select id="consumer-group" bind:value={consumerGroup}>
+            <option value="group-1">Group 1 (Red)</option>
+            <option value="group-2">Group 2 (Purple)</option>
+          </select>
+          
+          <button on:click={addConsumer}>Add Consumer</button>
+        </div>
+      </div>
+      
+      <div class="control-section">
+        <h2>Produce Message</h2>
+        <div class="form-group">
+          <label for="producer-select">Select Producer:</label>
+          <select id="producer-select" bind:value={selectedProducerId}>
+            {#each $systemStore.producers as producer}
+              <option value={producer.id}>{producer.name}</option>
+            {/each}
+          </select>
+          
+          <label for="message-content">Message Content:</label>
+          <input type="text" id="message-content" bind:value={messageContent} placeholder="Enter message content">
+          
+          <button on:click={produceMessage}>Send Message</button>
+        </div>
+      </div>
+      
+      <!-- Simple metrics -->
+      <div class="control-section">
+        <h2>Message Stats</h2>
+        <div class="metrics-summary">
           <div class="metric-item">
             <span>Messages in Topic:</span>
             <span class="metric-value">{$systemStore.messages.filter(m => m.status === 'in-topic').length}</span>
           </div>
           <div class="metric-item">
-            <span>Messages Being Processed:</span>
-            <span class="metric-value">{$systemStore.messages.filter(m => m.status === 'processing').length}</span>
-          </div>
-          <div class="metric-item">
-            <span>Messages Consumed:</span>
+            <span>Messages Processed:</span>
             <span class="metric-value">{$systemStore.messages.filter(m => m.status === 'consumed').length}</span>
           </div>
         </div>
-        
-        <div class="metrics-section">
-          <h3>Consumer Groups</h3>
-          
-          <div class="group-metrics">
-            <h4>Group 1</h4>
-            {#each $systemStore.consumers.filter(c => c.group === 'group-1') as consumer}
-              <div class="metric-item">
-                <span>{consumer.name}:</span>
-                <span class="metric-value">{consumer.processed} messages</span>
-              </div>
-            {/each}
-          </div>
-          
-          <div class="group-metrics">
-            <h4>Group 2</h4>
-            {#each $systemStore.consumers.filter(c => c.group === 'group-2') as consumer}
-              <div class="metric-item">
-                <span>{consumer.name}:</span>
-                <span class="metric-value">{consumer.processed} messages</span>
-              </div>
-            {/each}
-          </div>
-        </div>
       </div>
-    {/if}
-  </main>
+    </div>
+    
+    <!-- Right side: Visualization -->
+    <div class="visualization">
+      <svg class="canvas" width="100%" height="100%">
+        <!-- Draw connections -->
+        {#each $systemStore.producers as producer}
+          <line 
+            x1={producer.position.x + 75} 
+            y1={producer.position.y + 25} 
+            x2={$systemStore.topics[0].position.x} 
+            y2={$systemStore.topics[0].position.y + 25} 
+            stroke="rgba(255,255,255,0.3)" 
+            stroke-width="3"
+            stroke-dasharray="5,5"
+          />
+        {/each}
+        
+        {#each $systemStore.consumers as consumer}
+          <line 
+            x1={$systemStore.topics[0].position.x + 150} 
+            y1={$systemStore.topics[0].position.y + 25 + consumer.partition * 40} 
+            x2={consumer.position.x} 
+            y2={consumer.position.y + 25} 
+            stroke={consumer.group === 'group-1' ? 'rgba(231,76,60,0.3)' : 'rgba(155,89,182,0.3)'} 
+            stroke-width="3"
+            stroke-dasharray="5,5"
+          />
+        {/each}
+        
+        <!-- Draw messages -->
+        {#each $systemStore.messages as message}
+          {#if message.status === 'in-topic'}
+            <!-- Message in the topic -->
+            <circle 
+              cx={$systemStore.topics[0].position.x + 75} 
+              cy={$systemStore.topics[0].position.y + 25 + message.partition * 40} 
+              r="6" 
+              fill="#f1c40f"
+            />
+          {:else if message.status === 'processing'}
+            <!-- Message being processed - animate from topic to consumer -->
+            {@const consumer = $systemStore.consumers.find(c => c.partition === message.partition && c.active)}
+            {#if consumer}
+              <circle 
+                cx={$systemStore.topics[0].position.x + 75 + ((consumer.position.x - $systemStore.topics[0].position.x - 75) * 0.7)} 
+                cy={$systemStore.topics[0].position.y + 25 + message.partition * 40 + ((consumer.position.y - $systemStore.topics[0].position.y - 25 - message.partition * 40) * 0.7)} 
+                r="6" 
+                fill={consumer.color}
+              />
+            {/if}
+          {/if}
+        {/each}
+        
+        <!-- Draw producers -->
+        {#each $systemStore.producers as producer}
+          <g transform={`translate(${producer.position.x}, ${producer.position.y})`}>
+            <rect width="150" height="50" rx="10" fill={producer.color} class:active={producer.active} />
+            <text x="75" y="30" text-anchor="middle" fill="white" font-size="14px">{producer.name}</text>
+          </g>
+        {/each}
+        
+        <!-- Draw topic with partitions -->
+        <g transform={`translate(${$systemStore.topics[0].position.x}, ${$systemStore.topics[0].position.y})`}>
+          <rect width="150" height="150" rx="10" fill={$systemStore.topics[0].color} />
+          <text x="75" y="30" text-anchor="middle" fill="#333" font-size="16px" font-weight="bold">{$systemStore.topics[0].name}</text>
+          
+          <!-- Partitions -->
+          <rect x="10" y="45" width="130" height="30" rx="5" fill="rgba(0,0,0,0.1)" />
+          <text x="20" y="65" fill="#333" font-size="12px">Partition 0</text>
+          <text x="120" y="65" text-anchor="end" fill="#333" font-size="12px">
+            {$systemStore.messages.filter(m => m.status === 'in-topic' && m.partition === 0).length}
+          </text>
+          
+          <rect x="10" y="85" width="130" height="30" rx="5" fill="rgba(0,0,0,0.1)" />
+          <text x="20" y="105" fill="#333" font-size="12px">Partition 1</text>
+          <text x="120" y="105" text-anchor="end" fill="#333" font-size="12px">
+            {$systemStore.messages.filter(m => m.status === 'in-topic' && m.partition === 1).length}
+          </text>
+          
+          <rect x="10" y="125" width="130" height="30" rx="5" fill="rgba(0,0,0,0.1)" />
+          <text x="20" y="145" fill="#333" font-size="12px">Partition 2</text>
+          <text x="120" y="145" text-anchor="end" fill="#333" font-size="12px">
+            {$systemStore.messages.filter(m => m.status === 'in-topic' && m.partition === 2).length}
+          </text>
+        </g>
+        
+        <!-- Draw consumers -->
+        {#each $systemStore.consumers as consumer}
+          <g transform={`translate(${consumer.position.x}, ${consumer.position.y})`}>
+            <rect width="150" height="50" rx="10" fill={consumer.color} class:active={consumer.active} />
+            <text x="75" y="25" text-anchor="middle" fill="white" font-size="14px">{consumer.name}</text>
+            <text x="75" y="40" text-anchor="middle" fill="white" font-size="12px">
+              Group: {consumer.group}, Part: {consumer.partition}
+            </text>
+          </g>
+        {/each}
+      </svg>
+    </div>
+  </div>
   
   <div class="info-panel">
     <h3>About Consumer Groups</h3>
