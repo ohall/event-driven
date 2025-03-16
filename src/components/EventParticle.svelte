@@ -11,7 +11,7 @@
   let timeline;
   
   // Helper to get node position by ID
-  function getNodePosition(id: string) {
+  function getNodePosition(id) {
     // Find the node in one of our stores
     const emitter = $eventStore.emitters.find(e => e.id === id);
     if (emitter) {

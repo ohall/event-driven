@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { eventStore } from '../stores/eventStore.js';
-  import { pannable } from '../lib/pannable';
+  import { pannable } from '../lib/pannable.js';
   import EventEmitterNode from './EventEmitterNode.svelte';
   import EventHandlerNode from './EventHandlerNode.svelte';
   import EventQueueNode from './EventQueueNode.svelte';

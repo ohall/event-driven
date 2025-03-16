@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
-  import { pannable } from '../lib/pannable';
+  import { pannable } from '../lib/pannable.js';
   import { eventStore } from '../stores/eventStore.js';
     
   // Props
