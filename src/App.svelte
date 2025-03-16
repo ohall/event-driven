@@ -12,9 +12,11 @@
       { id: 'topic-1', name: 'Events Topic', type: 'topic', color: '#f1c40f', position: { x: 300, y: 200 }, messages: [], partitions: 3 }
     ],
     consumers: [
+      // Group 1 (red) - organized by partition
       { id: 'consumer-1', name: 'Consumer A', type: 'consumer', color: '#e74c3c', position: { x: 550, y: 100 }, group: 'group-1', partition: 0, active: false, processed: 0 },
-      { id: 'consumer-2', name: 'Consumer B', type: 'consumer', color: '#e74c3c', position: { x: 550, y: 200 }, group: 'group-1', partition: 1, active: false, processed: 0 },
-      { id: 'consumer-3', name: 'Consumer C', type: 'consumer', color: '#9b59b6', position: { x: 550, y: 300 }, group: 'group-2', partition: 0, active: false, processed: 0 }
+      { id: 'consumer-2', name: 'Consumer B', type: 'consumer', color: '#e74c3c', position: { x: 590, y: 100 }, group: 'group-1', partition: 1, active: false, processed: 0 },
+      // Group 2 (purple) - organized by partition
+      { id: 'consumer-3', name: 'Consumer C', type: 'consumer', color: '#9b59b6', position: { x: 550, y: 250 }, group: 'group-2', partition: 0, active: false, processed: 0 }
     ],
     messages: [],
     nextMessageId: 1
@@ -53,20 +55,63 @@
     if (!consumerName.trim()) return;
     
     systemStore.update(state => {
+      // Reorganize all consumers by partition and group
+      // Get current number of consumers in this group
+      const groupConsumers = state.consumers.filter(c => c.group === consumerGroup);
+      const partition = groupConsumers.length % 3;
+      
+      // Create new consumer
       const newConsumer = {
         id: `consumer-${Date.now()}`,
         name: consumerName,
         type: 'consumer',
         color: consumerGroup === 'group-1' ? '#e74c3c' : '#9b59b6',
-        position: { x: 550, y: 100 + (state.consumers.length * 80) % 400 },
         group: consumerGroup,
-        partition: state.consumers.filter(c => c.group === consumerGroup).length % 3,
+        partition: partition,
         active: false,
         processed: 0
       };
       
+      // Position based on partition (horizontally) and group (vertically)
+      if (consumerGroup === 'group-1') {
+        // Group 1 - top row
+        newConsumer.position = { 
+          x: 550 + (partition * 40), 
+          y: 100 + (groupConsumers.length * 30) % 80 // Stack within partition but not too much
+        };
+      } else {
+        // Group 2 - bottom row
+        newConsumer.position = { 
+          x: 550 + (partition * 40), 
+          y: 250 + (groupConsumers.length * 30) % 80 
+        };
+      }
+      
+      // Add the new consumer
       state.consumers = [...state.consumers, newConsumer];
       consumerName = '';
+      
+      // Reorganize existing consumers to keep the display clean
+      state.consumers = state.consumers.map((consumer, index) => {
+        const groupConsumers = state.consumers.filter(c => c.group === consumer.group);
+        const groupCount = groupConsumers.length;
+        
+        // Calculate position
+        if (consumer.group === 'group-1') {
+          consumer.position = { 
+            x: 550 + (consumer.partition * 40),
+            y: 100 + (groupConsumers.indexOf(consumer) * 30) % 80
+          };
+        } else {
+          consumer.position = { 
+            x: 550 + (consumer.partition * 40),
+            y: 250 + (groupConsumers.indexOf(consumer) * 30) % 80
+          };
+        }
+        
+        return consumer;
+      });
+      
       return state;
     });
   }
