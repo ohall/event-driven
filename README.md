@@ -26,7 +26,7 @@ A web application for exploring and learning about event-driven architecture thr
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/event-driven.git
+git clone https://github.com/ohall/event-driven.git
 cd event-driven
 ```
 
@@ -44,7 +44,9 @@ npm run dev
 yarn dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+4. Access the application:
+   - Development: Open your browser and navigate to `http://localhost:5173`
+   - Production: Visit [https://ohall.github.io/event-driven/](https://ohall.github.io/event-driven/)
 
 ## Usage
 
