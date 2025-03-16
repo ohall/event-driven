@@ -31,7 +31,7 @@ export const pannable = (node, params) => {
     params?.onPanMove?.(event, dx, dy);
   }
   
-  function handleMouseup(event: MouseEvent) {
+  function handleMouseup(event) {
     x = event.clientX;
     y = event.clientY;
     
@@ -48,7 +48,7 @@ export const pannable = (node, params) => {
   node.addEventListener('mousedown', handleMousedown);
   
   return {
-    update(newParams: PannableParams) {
+    update(newParams) {
       params = newParams;
     },
     destroy() {
