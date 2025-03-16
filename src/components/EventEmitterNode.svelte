@@ -4,7 +4,7 @@
   import { eventStore } from '../stores/eventStore.js';
     
   // Props
-  export let emitter: EventEmitter;
+  export let emitter;
   
   // Local state
   let isDragging = false;

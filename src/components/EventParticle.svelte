@@ -4,11 +4,11 @@
     import { eventStore } from '../stores/eventStore.js';
   
   // Props
-  export let event: EventData;
+  export let event;
   
   // State
-  let particleElement: HTMLDivElement;
-  let timeline: gsap.core.Timeline;
+  let particleElement;
+  let timeline;
   
   // Helper to get node position by ID
   function getNodePosition(id: string) {

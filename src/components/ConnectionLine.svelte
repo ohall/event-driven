@@ -2,7 +2,7 @@
   import { eventStore } from '../stores/eventStore.js';
   
   // Props
-  export let connection: { from: string; to: string; type: string };
+  export let connection;
   
   // Derived values
   $: fromNode = getNodePosition(connection.from);

@@ -4,7 +4,7 @@
   import { eventStore } from '../stores/eventStore.js';
     
   // Props
-  export let queue: EventQueue;
+  export let queue;
   
   // Local state
   let isDragging = false;
