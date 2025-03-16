@@ -1,0 +1,34 @@
+{
+  "name": "event-driven",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --ext .js,.svelte,.ts"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.0.2",
+    "@tsconfig/svelte": "^5.0.2",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-svelte": "^2.35.1",
+    "svelte": "^4.2.12",
+    "svelte-check": "^3.6.3",
+    "svelte-preprocess": "^5.1.3",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.5",
+    "vitest": "^1.2.2"
+  },
+  "dependencies": {
+    "svelte-gestures": "^1.5.2",
+    "gsap": "^3.12.5"
+  }
+}
