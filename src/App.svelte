@@ -440,9 +440,9 @@
                 <rect 
                   x={consumer.position.x}
                   y={consumer.position.y}
-                  width="150"
-                  height="50"
-                  rx="10"
+                  width="140"
+                  height="45"
+                  rx="8"
                   fill="none" 
                   stroke="white"
                   stroke-width="3"
@@ -489,10 +489,10 @@
         <!-- Draw consumers -->
         {#each $systemStore.consumers as consumer}
           <g transform={`translate(${consumer.position.x}, ${consumer.position.y})`}>
-            <rect width="150" height="50" rx="10" fill={consumer.color} class:active={consumer.active} />
-            <text x="75" y="25" text-anchor="middle" fill="white" font-size="14px">{consumer.name}</text>
-            <text x="75" y="40" text-anchor="middle" fill="white" font-size="12px">
-              Group: {consumer.group}, Part: {consumer.partition}
+            <rect width="140" height="45" rx="8" fill={consumer.color} class:active={consumer.active} />
+            <text x="70" y="20" text-anchor="middle" fill="white" font-size="13px">{consumer.name}</text>
+            <text x="70" y="36" text-anchor="middle" fill="white" font-size="11px">
+              Group: {consumer.group.split('-')[1]}, Part: {consumer.partition}
             </text>
           </g>
         {/each}
