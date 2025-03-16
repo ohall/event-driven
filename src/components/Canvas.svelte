@@ -18,12 +18,12 @@
   let mouseX = 0;
   let mouseY = 0;
   
-  function handleMouseMove(event: MouseEvent) {
+  function handleMouseMove(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
   }
   
-  function handleNodeSelect(id: string, type: 'emitter' | 'handler' | 'queue') {
+  function handleNodeSelect(id, type) {
     if (connectMode) {
       if (!connectFrom) {
         connectFrom = id;

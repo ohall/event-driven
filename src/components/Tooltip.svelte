@@ -1,6 +1,6 @@
 <script>
-  export let text: string;
-  export let position: 'top' | 'bottom' | 'left' | 'right' = 'top';
+  export let text;
+  export let position = 'top';
 </script>
 
 <div class="tooltip">
