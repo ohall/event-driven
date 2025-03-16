@@ -31,7 +31,7 @@
       } else {
         // Create a connection
         if (connectFrom !== id) {
-          let connectionType: string;
+          let connectionType;
           
           if (connectType === 'emitter' && type === 'queue') {
             connectionType = 'queue';
