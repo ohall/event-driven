@@ -282,26 +282,22 @@
           {#if message.status === 'producing'}
             <!-- Message being produced - animate from producer to topic -->
             {@const producer = $systemStore.producers.find(p => p.id === message.producer)}
-            {#if producer}
+            {#if producer && message.animationProgress !== undefined}
+              <!-- Calculate position along the path -->
+              {@const startX = producer.position.x + 75}
+              {@const startY = producer.position.y + 25}
+              {@const endX = $systemStore.topics[0].position.x}
+              {@const endY = $systemStore.topics[0].position.y + 25}
+              {@const progress = message.animationProgress || 0}
+              {@const posX = startX + (endX - startX) * progress}
+              {@const posY = startY + (endY - startY) * progress}
+              
               <circle 
-                r="6" 
+                cx={posX}
+                cy={posY}
+                r={6 + (message.pulse || 0)}
                 fill="#2980b9"
-              >
-                <animateMotion
-                  dur="0.8s"
-                  repeatCount="1"
-                  calcMode="linear"
-                  keyPoints="0;1"
-                  keyTimes="0;1"
-                  path={`M${producer.position.x + 75},${producer.position.y + 25} L${$systemStore.topics[0].position.x},${$systemStore.topics[0].position.y + 25}`}
-                />
-                <animate 
-                  attributeName="r" 
-                  values="5;7;5" 
-                  dur="0.4s" 
-                  repeatCount="indefinite"
-                />
-              </circle>
+              />
             {/if}
           {:else if message.status === 'in-topic'}
             <!-- Message in the topic -->
@@ -312,49 +308,39 @@
               fill="#f1c40f"
             />
           {:else if message.status === 'processing'}
-            <!-- Message being processed - animate exactly along the path -->
+            <!-- Message being processed - calculate position along path -->
             {@const consumer = $systemStore.consumers.find(c => c.partition === message.partition && c.active)}
-            {#if consumer}
-              <!-- Animation with actual SVG animation element for smooth motion -->
-              <circle 
-                r="6" 
-                fill={consumer.color}
-              >
-                <animateMotion
-                  dur="1.5s"
-                  repeatCount="1"
-                  calcMode="linear"
-                  keyPoints="0;1"
-                  keyTimes="0;1"
-                  path={`M${$systemStore.topics[0].position.x + 150},${$systemStore.topics[0].position.y + 25 + message.partition * 40} L${consumer.position.x},${consumer.position.y + 25}`}
-                />
-                <animate 
-                  attributeName="r" 
-                  values="5;7;5" 
-                  dur="0.6s" 
-                  repeatCount="indefinite"
-                />
-              </circle>
+            {#if consumer && message.animationProgress !== undefined}
+              <!-- Calculate position along the path -->
+              {@const startX = $systemStore.topics[0].position.x + 150}
+              {@const startY = $systemStore.topics[0].position.y + 25 + message.partition * 40}
+              {@const endX = consumer.position.x}
+              {@const endY = consumer.position.y + 25}
+              {@const progress = message.animationProgress || 0}
+              {@const posX = startX + (endX - startX) * progress}
+              {@const posY = startY + (endY - startY) * progress}
               
-              <!-- Highlight the active consumer with glow -->
-              <rect 
-                x={consumer.position.x} 
-                y={consumer.position.y} 
-                width="150" 
-                height="50" 
-                rx="10" 
-                fill="none" 
-                stroke="white" 
-                stroke-width="3" 
-                opacity="0.7"
-              >
-                <animate 
-                  attributeName="opacity" 
-                  values="0.2;0.7;0.2" 
-                  dur="1s" 
-                  repeatCount="indefinite"
+              <circle 
+                cx={posX}
+                cy={posY}
+                r={6 + (message.pulse || 0)}
+                fill={consumer.color}
+              />
+              
+              <!-- Highlight active consumer -->
+              {#if progress > 0.7}
+                <rect 
+                  x={consumer.position.x}
+                  y={consumer.position.y}
+                  width="150"
+                  height="50"
+                  rx="10"
+                  fill="none" 
+                  stroke="white"
+                  stroke-width="3"
+                  opacity={0.5 + Math.sin(Date.now() / 200) * 0.3}
                 />
-              </rect>
+              {/if}
             {/if}
           {/if}
         {/each}
