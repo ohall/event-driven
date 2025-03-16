@@ -14,9 +14,9 @@
     consumers: [
       // Group 1 (red) - organized by partition
       { id: 'consumer-1', name: 'Consumer A', type: 'consumer', color: '#e74c3c', position: { x: 550, y: 100 }, group: 'group-1', partition: 0, active: false, processed: 0 },
-      { id: 'consumer-2', name: 'Consumer B', type: 'consumer', color: '#e74c3c', position: { x: 590, y: 100 }, group: 'group-1', partition: 1, active: false, processed: 0 },
+      { id: 'consumer-2', name: 'Consumer B', type: 'consumer', color: '#e74c3c', position: { x: 750, y: 100 }, group: 'group-1', partition: 1, active: false, processed: 0 },
       // Group 2 (purple) - organized by partition
-      { id: 'consumer-3', name: 'Consumer C', type: 'consumer', color: '#9b59b6', position: { x: 550, y: 250 }, group: 'group-2', partition: 0, active: false, processed: 0 }
+      { id: 'consumer-3', name: 'Consumer C', type: 'consumer', color: '#9b59b6', position: { x: 550, y: 350 }, group: 'group-2', partition: 0, active: false, processed: 0 }
     ],
     messages: [],
     nextMessageId: 1
@@ -87,8 +87,10 @@
       const newConsumers = [...state.consumers, newConsumer];
       
       // Position ALL consumers to avoid overlap
-      const spacingX = 180; // Width of consumer + padding
-      const spacingY = 80;  // Height of consumer + padding
+      const consumerWidth = 140; // Width of consumer element
+      const consumerHeight = 45; // Height of consumer element
+      const spacingX = 200; // Width of consumer + padding
+      const spacingY = 100; // Height of consumer + padding (increased significantly)
       
       // Group and partition all consumers for positioning
       const consumersByGroup = {
@@ -104,7 +106,7 @@
         
         // Base position for this partition
         const baseX = 550 + (consumer.partition * spacingX);
-        const baseY = 100 + (groupIndex * 220); // Group 1 at y=100, Group 2 at y=320 (increased spacing)
+        const baseY = 100 + (groupIndex * 250); // Group 1 at y=100, Group 2 at y=350 (much larger spacing)
         
         // Position with offset based on index within partition
         consumer.position = {
