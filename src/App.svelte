@@ -203,22 +203,75 @@
         const topic = state.topics[0];
         const messages = [...state.messages];
         
-        // For each consumer, find a message in their partition
+        // Group consumers by partition and group
+        const consumersByPartitionAndGroup = {};
+        
+        // Initialize structure
+        for (let partition = 0; partition < 3; partition++) {
+          consumersByPartitionAndGroup[partition] = {
+            'group-1': [],
+            'group-2': []
+          };
+        }
+        
+        // Organize consumers by partition and group
         state.consumers.forEach(consumer => {
           if (!consumer.active) {
-            const messageIndex = messages.findIndex(m => 
-              m.status === 'in-topic' && 
-              m.partition === consumer.partition
-            );
+            consumersByPartitionAndGroup[consumer.partition][consumer.group].push(consumer);
+          }
+        });
+        
+        // For each partition, find eligible messages and assign to consumers in each group
+        for (let partition = 0; partition < 3; partition++) {
+          // Find messages in this partition that are in the topic
+          const eligibleMessages = messages.filter(m => 
+            m.status === 'in-topic' && 
+            m.partition === partition
+          );
+          
+          // For each message, try to assign to one consumer in each group
+          eligibleMessages.forEach(message => {
+            // Try to assign to a consumer in group 1
+            if (consumersByPartitionAndGroup[partition]['group-1'].length > 0) {
+              const consumer = consumersByPartitionAndGroup[partition]['group-1'][0];
+              if (!consumer.active) {
+                processMessageForConsumer(message, consumer, messages);
+                // Remove this consumer from available list
+                consumersByPartitionAndGroup[partition]['group-1'].shift();
+              }
+            }
             
-            if (messageIndex !== -1) {
-              // Consumer processes this message
-              const messageId = messages[messageIndex].id;
-              consumer.active = true;
-              messages[messageIndex].status = 'processing';
-              messages[messageIndex].animationProgress = 0;
-              messages[messageIndex].consumerId = consumer.id;
-              messages[messageIndex].pulse = 0;
+            // Try to assign to a consumer in group 2 (same message, different consumer group)
+            if (consumersByPartitionAndGroup[partition]['group-2'].length > 0) {
+              const consumer = consumersByPartitionAndGroup[partition]['group-2'][0];
+              if (!consumer.active) {
+                processMessageForConsumer(message, consumer, messages);
+                // Remove this consumer from available list
+                consumersByPartitionAndGroup[partition]['group-2'].shift();
+              }
+            }
+          });
+        }
+        
+        return {
+          ...state,
+          messages
+        };
+      });
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
+  }
+  
+  // Helper function to process a message for a specific consumer
+  function processMessageForConsumer(message, consumer, messages) {
+    // Consumer processes this message
+    const messageId = message.id;
+    consumer.active = true;
+    message.status = 'processing';
+    message.animationProgress = 0;
+    message.consumerId = consumer.id;
+    message.pulse = 0;
               
               // Animate the message moving from topic to consumer
               let progress = 0;
