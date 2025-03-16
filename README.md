@@ -2,6 +2,8 @@
 
 A web application for exploring and learning about event-driven architecture through interactive visualization and simulation.
 
+🚀 **[Live Demo](https://ohall.github.io/event-driven/)**
+
 ## Features
 
 - **Interactive Canvas**: Drag and drop components to design your event flow

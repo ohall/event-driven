@@ -402,17 +402,25 @@
               fill="#f1c40f"
             />
           {:else if message.status === 'processing'}
-            <!-- Message being processed - calculate position along path -->
+            <!-- Message being processed - calculate position along curved path -->
             {@const consumer = $systemStore.consumers.find(c => c.partition === message.partition && c.active)}
             {#if consumer && message.animationProgress !== undefined}
-              <!-- Calculate position along the path -->
+              <!-- Calculate position along the curved Bezier path -->
               {@const startX = $systemStore.topics[0].position.x + 150}
               {@const startY = $systemStore.topics[0].position.y + 25 + message.partition * 40}
+              {@const cp1x = $systemStore.topics[0].position.x + 250}
+              {@const cp1y = $systemStore.topics[0].position.y + 25 + message.partition * 40}
+              {@const cp2x = consumer.position.x - 100}
+              {@const cp2y = consumer.position.y + 25}
               {@const endX = consumer.position.x}
               {@const endY = consumer.position.y + 25}
               {@const progress = message.animationProgress || 0}
-              {@const posX = startX + (endX - startX) * progress}
-              {@const posY = startY + (endY - startY) * progress}
+              
+              <!-- Cubic Bezier position calculation -->
+              {@const t = progress}
+              {@const mt = 1 - t}
+              {@const posX = mt*mt*mt*startX + 3*mt*mt*t*cp1x + 3*mt*t*t*cp2x + t*t*t*endX}
+              {@const posY = mt*mt*mt*startY + 3*mt*mt*t*cp1y + 3*mt*t*t*cp2y + t*t*t*endY}
               
               <circle 
                 cx={posX}
