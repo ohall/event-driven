@@ -37,7 +37,7 @@
     }
   }
   
-  function dequeueEvent(eventId: string) {
+  function dequeueEvent(eventId) {
     eventStore.dequeueEvent(queue.id, eventId);
   }
   
