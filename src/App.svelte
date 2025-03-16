@@ -1,22 +1,9 @@
-<script lang="ts">
+<script>
   import { onMount } from 'svelte';
   import './app.css';
   
   // Import components
-  import Header from './components/Header.svelte';
   import Canvas from './components/Canvas.svelte';
-  import InfoPanel from './components/InfoPanel.svelte';
-  import Toolbar from './components/Toolbar.svelte';
-  import IntroModal from './components/IntroModal.svelte';
-  
-  // Import stores
-  import { gameStore } from './stores/gameStore';
-  
-  let showIntro = true;
-  
-  function closeIntro() {
-    showIntro = false;
-  }
   
   onMount(() => {
     // Initialize any animations or libraries here
@@ -24,17 +11,10 @@
 </script>
 
 <div class="app">
-  <Header />
-  
+  <h1>Event-Driven Architecture Explorer</h1>
   <main>
-    <Toolbar />
     <Canvas />
-    <InfoPanel />
   </main>
-  
-  {#if showIntro}
-    <IntroModal on:close={closeIntro} />
-  {/if}
 </div>
 
 <style>
@@ -44,6 +24,12 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
+    padding: 20px;
+  }
+  
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
   }
   
   main {
