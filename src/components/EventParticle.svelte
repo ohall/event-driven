@@ -1,8 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import gsap from 'gsap';
-  import type { EventData } from '../stores/eventStore';
-  import { eventStore } from '../stores/eventStore';
+    import { eventStore } from '../stores/eventStore.js';
   
   // Props
   export let event: EventData;

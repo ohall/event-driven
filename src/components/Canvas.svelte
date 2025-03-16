@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { eventStore } from '../stores/eventStore';
+  import { eventStore } from '../stores/eventStore.js';
   import { pannable } from '../lib/pannable';
   import EventEmitterNode from './EventEmitterNode.svelte';
   import EventHandlerNode from './EventHandlerNode.svelte';

@@ -1,5 +1,5 @@
 <script>
-  import { gameStore } from '../stores/gameStore';
+  import { gameStore } from '../stores/gameStore.js';
   import { slide } from 'svelte/transition';
   import { quintOut } from 'svelte/easing';
   

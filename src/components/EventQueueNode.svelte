@@ -1,9 +1,8 @@
 <script>
   import { createEventDispatcher } from 'svelte';
   import { pannable } from '../lib/pannable';
-  import { eventStore } from '../stores/eventStore';
-  import type { EventQueue } from '../stores/eventStore';
-  
+  import { eventStore } from '../stores/eventStore.js';
+    
   // Props
   export let queue: EventQueue;
   
