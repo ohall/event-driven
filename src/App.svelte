@@ -87,8 +87,8 @@
       const newConsumers = [...state.consumers, newConsumer];
       
       // Position ALL consumers to avoid overlap
-      const spacingX = 170; // Width of consumer + padding
-      const spacingY = 70;  // Height of consumer + padding
+      const spacingX = 180; // Width of consumer + padding
+      const spacingY = 80;  // Height of consumer + padding
       
       // Group and partition all consumers for positioning
       const consumersByGroup = {
@@ -104,7 +104,7 @@
         
         // Base position for this partition
         const baseX = 550 + (consumer.partition * spacingX);
-        const baseY = 100 + (groupIndex * 200); // Group 1 at y=100, Group 2 at y=300
+        const baseY = 100 + (groupIndex * 220); // Group 1 at y=100, Group 2 at y=320 (increased spacing)
         
         // Position with offset based on index within partition
         consumer.position = {
